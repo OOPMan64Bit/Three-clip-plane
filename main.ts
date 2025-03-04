@@ -129,7 +129,6 @@ function createCheckbox(label) {
   checkbox.checked = true;
   checkbox.onchange = function (e) {
     plane._controls.showArrow(this.checked);
-    console.log(this.checked);
   }
   // Create a label for the checkbox
   const labelElement = document.createElement('label');

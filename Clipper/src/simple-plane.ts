@@ -1,11 +1,7 @@
 import * as THREE from "three";
-import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
-
-import { CustomTransformControls } from "./CustomTransformControls";
-
+// import { TransformControls } from "three/examples/jsm/controls/TransformControls.js";
 import { Hideable, Disposable, Event, World, Components } from "@thatopen-platform/components-beta";
-import { CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
-
+import { CustomTransformControls } from "./CustomTransformControls.js";
 /**
  * Each of the clipping planes created by the clipper.
  */
@@ -59,7 +55,7 @@ export class SimplePlane implements Disposable, Hideable {
   private readonly _controls: CustomTransformControls;
 
   private readonly _hiddenMaterial = new THREE.MeshBasicMaterial({
-    visible: true,
+    visible: false,
   });
 
   /**
@@ -191,7 +187,6 @@ export class SimplePlane implements Disposable, Hideable {
   /** {@link Updateable.update} */
   update = () => {
     if (!this._enabled) return;
-
     this.three.setFromNormalAndCoplanarPoint(
       this.normal,
       this._helper.position,
@@ -242,9 +237,6 @@ export class SimplePlane implements Disposable, Hideable {
     this._controlsActive = state;
   }
 
-  // here is most important part.
-  // we must to change axis Z gizmo of TransformContronls in three.js
-
   private newTransformControls() {
     if (!this.world.renderer) {
       throw new Error("No renderer found for clipping plane!");
@@ -265,21 +257,16 @@ export class SimplePlane implements Disposable, Hideable {
     controls.showY = false;
     controls.setSpace("local");
     this.createArrowBoundingBox();
-    // controls.getHelper().children[0].children[0].add(this._arrowBoundBox);
-    // controls.getHelper().children[0].children[0].add(new THREE.Mesh(new THREE.SphereGeometry(0.2, 32, 16), new THREE.MeshBasicMaterial({color: 0xF00, visible: true})));
-
+    controls.getHelper().children[0].children[0].add(this._arrowBoundBox);
   }
 
   private createArrowBoundingBox() {
-    // this._arrowBoundBox.geometry = new THREE.CylinderGeometry(0.18, 0.18, 1.2);
-    this._arrowBoundBox.geometry = new THREE.SphereGeometry(0.18, 32, 16);
+    this._arrowBoundBox.geometry = new THREE.CylinderGeometry(0.18, 0.18, 1.2);
     this._arrowBoundBox.material = this._hiddenMaterial;
     this._arrowBoundBox.rotateX(Math.PI / 2);
     this._arrowBoundBox.updateMatrix();
     this._arrowBoundBox.geometry.applyMatrix4(this._arrowBoundBox.matrix);
   }
-
- 
 
   private changeDrag = (event: any) => {
     this._visible = !event.value;
@@ -299,24 +286,12 @@ export class SimplePlane implements Disposable, Hideable {
     this.world.camera.enabled = this._visible;
   }
 
-  private newIcon() {
-    const iconDiv = document.createElement("div");
-    iconDiv.style.backgroundColor = "#ffffff";
-    iconDiv.style.width = "32px";
-    iconDiv.style.height = "32px";
-    iconDiv.style.cursor = "pointer";
-    iconDiv.style.background = "#F00";
-    const icon = new CSS2DObject( iconDiv );
-    return icon;
-  }
-
   private newHelper() {
     const helper = new THREE.Object3D();
     helper.lookAt(this.normal);
     helper.position.copy(this.origin);
     this._planeMesh.position.z += 0.01;
     helper.add(this._planeMesh);
-    // helper.add(this.newIcon());
     this.world.scene.three.add(helper);
     return helper;
   }
@@ -327,6 +302,4 @@ export class SimplePlane implements Disposable, Hideable {
     mesh.scale.set(size, size, size);
     return mesh;
   }
-
 }
-
